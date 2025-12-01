@@ -1,0 +1,240 @@
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Adquisiciones</h1>
+        <button (click)="navigateToCreate()" class="btn-primary">
+            Nueva Adquisición
+        </button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <app-acquisition-stats />
+
+    <!-- Filter Component -->
+    <app-acquisition-filter (searchChange)="onSearchChange($event)" (filterChange)="onFilterChange($event)" />
+
+    @if (loading()) {
+    <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+    </div>
+    } @else if (acquisitions().length === 0) {
+    <div class="card text-center py-12">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay adquisiciones</h3>
+        <p class="text-gray-500 mb-4">Comienza creando tu primera adquisición</p>
+        <button (click)="navigateToCreate()" class="btn-primary">
+            Crear Adquisición
+        </button>
+    </div>
+    } @else {
+    <!-- Custom Table Design -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- Table Header Bar -->
+        <div class="bg-primary px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h2 class="text-white text-lg font-semibold">Lista de Adquisiciones</h2>
+            </div>
+            <div class="flex items-center gap-2 text-white text-sm">
+                <span>Total de registros:</span>
+                <span class="bg-secondary text-primary font-bold px-3 py-1 rounded-full text-xs">
+                    {{ acquisitions().length }} de {{ totalCount() }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-100 border-b-2 border-secondary">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Estado
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Presupuesto</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Unidad
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tipo
+                        </th>
+                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Cantidad</th>
+                        <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Valor
+                            Unit.</th>
+                        <th class="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">Valor
+                            Total</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Fecha
+                        </th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Proveedor</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Documentación</th>
+                        <th class="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
+                            Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-gray-50/50">
+                    @for (acquisition of acquisitions(); track acquisition.id) {
+                    <tr class="hover:bg-white transition-colors duration-150">
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            @if (acquisition.isActive) {
+                            <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">ACTIVO</span>
+                            } @else {
+                            <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">INACTIVO</span>
+                            }
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
+                            {{ formatCurrency(acquisition.budget) }}
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-700 max-w-[150px] truncate"
+                            title="{{ acquisition.unit }}">
+                            {{ acquisition.unit }}
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-700">
+                            {{ acquisition.serviceType }}
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-700 text-center">
+                            {{ acquisition.quantity }}
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-700 text-right whitespace-nowrap">
+                            {{ formatCurrency(acquisition.unitValue) }}
+                        </td>
+                        <td class="px-4 py-4 text-sm font-bold text-secondary text-right whitespace-nowrap">
+                            {{ formatCurrency(acquisition.totalValue) }}
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
+                            {{ acquisition.acquisitionDate | date:'dd/MM/yyyy' }}
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-700 max-w-[150px] truncate"
+                            title="{{ acquisition.provider }}">
+                            {{ acquisition.provider }}
+                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-700 max-w-[150px] truncate"
+                            title="{{ acquisition.documentation }}">
+                            {{ acquisition.documentation }}
+                        </td>
+                        <td class="px-4 py-4 text-center whitespace-nowrap">
+                            <div class="flex items-center justify-center gap-2">
+                                <button (click)="navigateToEdit(acquisition.id)"
+                                    class="text-gray-400 hover:text-accent transition-colors" title="Editar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button (click)="toggleStatus(acquisition.id)"
+                                    [class]="acquisition.isActive ? 'text-gray-400 hover:text-red-500 transition-colors' : 'text-gray-400 hover:text-green-500 transition-colors'"
+                                    [title]="acquisition.isActive ? 'Desactivar' : 'Activar'">
+                                    @if (acquisition.isActive) {
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    } @else {
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    }
+                                </button>
+                                <button (click)="navigateToHistory(acquisition.id)"
+                                    class="text-gray-400 hover:text-primary transition-colors" title="Ver historial">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Mobile Card View (kept for responsiveness) -->
+    <div class="md:hidden space-y-4 mt-6">
+        @for (acquisition of acquisitions(); track acquisition.id) {
+        <div class="card border-l-4" [class.border-green-500]="acquisition.isActive"
+            [class.border-red-500]="!acquisition.isActive">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">ID: {{ acquisition.id }}</p>
+                    <h3 class="font-semibold text-lg text-primary">{{ acquisition.unit }}</h3>
+                </div>
+                @if (acquisition.isActive) {
+                <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">ACTIVO</span>
+                } @else {
+                <span class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">INACTIVO</span>
+                }
+            </div>
+
+            <div class="space-y-2 mb-4">
+                <p class="text-sm flex justify-between"><span class="font-medium text-gray-600">Presupuesto:</span>
+                    <span>{{ formatCurrency(acquisition.budget) }}</span>
+                </p>
+                <p class="text-sm flex justify-between"><span class="font-medium text-gray-600">Tipo:</span> <span>{{
+                        acquisition.serviceType }}</span></p>
+                <p class="text-sm flex justify-between"><span class="font-medium text-gray-600">Cantidad:</span>
+                    <span>{{ acquisition.quantity }}</span>
+                </p>
+                <p class="text-sm flex justify-between"><span class="font-medium text-gray-600">Valor Unit.:</span>
+                    <span>{{ formatCurrency(acquisition.unitValue) }}</span>
+                </p>
+                <p class="text-sm flex justify-between border-t pt-2 mt-2"><span class="font-bold text-gray-700">Valor
+                        Total:</span> <span class="text-secondary font-bold">{{ formatCurrency(acquisition.totalValue)
+                        }}</span></p>
+            </div>
+
+            <div class="flex gap-2 pt-3 border-t border-gray-200">
+                <button (click)="navigateToEdit(acquisition.id)" class="flex-1 btn-outline text-sm py-2">
+                    Editar
+                </button>
+                <button (click)="toggleStatus(acquisition.id)"
+                    [class]="acquisition.isActive ? 'flex-1 bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg transition-all' : 'flex-1 bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-4 rounded-lg transition-all'">
+                    {{ acquisition.isActive ? 'Desactivar' : 'Activar' }}
+                </button>
+                <button (click)="navigateToHistory(acquisition.id)" class="flex-1 btn-primary text-sm py-2">
+                    Historial
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+    <div class="mt-6 flex justify-center items-center gap-2">
+        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            Anterior
+        </button>
+
+        <div class="flex gap-1">
+            @for (page of getPageNumbers(); track page) {
+            <button (click)="goToPage(page)"
+                [class]="page === currentPage() ? 'px-4 py-2 bg-primary text-white rounded-lg font-medium' : 'px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'">
+                {{ page }}
+            </button>
+            }
+        </div>
+
+        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            Siguiente
+        </button>
+    </div>
+
+    <p class="text-center text-sm text-gray-600 mt-4">
+        Mostrando {{ (currentPage() - 1) * pageSize() + 1 }} -
+        {{ Math.min(currentPage() * pageSize(), totalCount()) }} de {{ totalCount() }} adquisiciones
+    </p>
+    }
+    }
+</div>
